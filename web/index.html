@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>TalentLedger</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body style="--accent: #b493ff; --accent-dark: #6543a8">
+  <main>
+    <nav>
+      <a class="brand" href="/" aria-label="TalentLedger home"><span class="mark"></span><span id="product-name">TalentLedger</span></a>
+      <div class="state"><span class="state-dot"></span><span id="connection-state" data-connected="false">Disconnected</span></div>
+    </nav>
+
+    <header>
+      <div>
+        <p class="eyebrow">PRIVATE BUSINESS WORKSPACE</p>
+        <h1 id="tagline">Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.</h1>
+      </div>
+      <dl>
+        <div><dt>Category</dt><dd id="category">Recruiting</dd></div>
+        <div><dt>Hosted plan</dt><dd id="plan">starter</dd></div>
+        <div><dt>Typed actions</dt><dd id="action-count">17</dd></div>
+        <div><dt>Module</dt><dd id="module-id">hire</dd></div>
+      </dl>
+    </header>
+
+    <section class="connection" aria-labelledby="connection-title">
+      <div><h2 id="connection-title">Connect this browser</h2><p>The backend API token stays server-side. Enter only the separate web access key configured for this UI.</p></div>
+      <div class="connection-controls">
+        <label for="web-key">Web access key</label>
+        <input id="web-key" type="password" autocomplete="current-password" placeholder="At least 24 characters">
+        <button id="connect" class="primary">Connect</button>
+        <button id="disconnect" class="quiet">Clear</button>
+      </div>
+    </section>
+
+    <section class="workspace-grid">
+      <article>
+        <div class="article-heading"><div><h2>Workspace</h2><p>Inspect or enable the product-scoped module.</p></div></div>
+        <div class="button-row"><button id="workspace">Read workspace</button><button id="enable">Enable product</button><button id="records">List records</button></div>
+      </article>
+      <article class="action-card">
+        <div class="article-heading"><div><h2>Typed action</h2><p id="action-description"></p></div></div>
+        <label for="action">Action</label>
+        <select id="action"></select>
+        <label for="action-input">JSON input</label>
+        <textarea id="action-input" spellcheck="false"></textarea>
+        <button id="run-action" class="primary">Run scoped action</button>
+      </article>
+      <article class="output-card">
+        <div class="article-heading"><div><h2>Result</h2><p>API responses and validation failures appear here.</p></div></div>
+        <pre id="output" data-kind="neutral">Connect to read the workspace.</pre>
+      </article>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

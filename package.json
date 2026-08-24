@@ -1,0 +1,36 @@
+{
+  "name": "@managed-oss/talentledger",
+  "version": "0.1.0",
+  "description": "Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohanarun/talentledger.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rohanarun/talentledger/issues"
+  },
+  "homepage": "https://github.com/rohanarun/talentledger#readme",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "bin": {
+    "talentledger": "src/cli.mjs",
+    "talentledger-mcp": "src/mcp.mjs"
+  },
+  "files": [
+    "src",
+    "web",
+    "product-manifest.json",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md",
+    "Dockerfile"
+  ],
+  "scripts": {
+    "start": "node src/web-server.mjs",
+    "test": "node --test --test-concurrency=1",
+    "verify": "node scripts/verify-manifest.mjs && node --test --test-concurrency=1"
+  }
+}

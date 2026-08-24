@@ -1,0 +1,1169 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "productVersion": "0.1.0",
+    "backendRelease": "v0.4.2",
+    "backendCommit": "20c4a704c77cbbbff1da995e1d91b937625a8aa4",
+    "backendSourceSnapshotSha256": "d0b7b1079d4924eb7369c788a979a707d45bb63470290e6ac33ee5662d78f69f",
+    "generatedAt": "2026-08-24T00:00:00.000Z",
+    "generator": "managed-oss-cloud/scripts/generate-product-repositories.mjs"
+  },
+  "product": {
+    "slug": "talentledger",
+    "command": "talentledger",
+    "mcpPrefix": "talentledger",
+    "environmentPrefix": "TALENTLEDGER",
+    "name": "TalentLedger",
+    "tagline": "Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.",
+    "repository": "https://github.com/rohanarun/talentledger",
+    "license": "MIT",
+    "accent": "#b493ff",
+    "accentDark": "#6543a8"
+  },
+  "module": {
+    "id": "hire",
+    "category": "Recruiting",
+    "description": "Versioned jobs and applications with structured human review, immutable evidence, candidate rights, and no automated terminal decisions.",
+    "minimumHostedPlan": "starter",
+    "resourceClass": "shared",
+    "recordTypes": [
+      "job",
+      "pipeline",
+      "candidate",
+      "application",
+      "resume-document",
+      "application-event",
+      "interview-plan",
+      "interview",
+      "scorecard",
+      "decision",
+      "offer",
+      "communication",
+      "consent-notice",
+      "deletion-request",
+      "export"
+    ],
+    "aiCapabilities": [
+      "extract cited resume facts",
+      "summarize selected candidate evidence",
+      "draft review-only recruiting content"
+    ],
+    "scaleGuidance": "Use Scale for many recruiters, large private resume storage, high application volume, OCR, or long retention history.",
+    "externalUsage": [
+      "customer object storage",
+      "customer calendar",
+      "customer email provider",
+      "customer-selected OCR or model endpoint"
+    ]
+  },
+  "backend": {
+    "defaultUrl": "https://cloud.getsupers.com",
+    "workspaceEndpoint": "/api/suite/workspace",
+    "actionEndpointPattern": "/api/suite/modules/hire/actions/{actionId}",
+    "authentication": "Bearer API token",
+    "databaseBoundary": "All shared database access and tenant isolation remain behind the managed-oss-cloud API."
+  },
+  "cleanRoom": {
+    "statement": "Original clean-room implementation of the recruiting software category, designed and written independently.",
+    "sourceBoundary": "Public category behavior informed requirements; implementation and product identity are original."
+  },
+  "actions": [
+    {
+      "id": "interview-plan-create",
+      "moduleId": "hire",
+      "title": "Create interview plan",
+      "description": "Create a workspace-owned interview plan shell for later structured configuration.",
+      "operation": "create",
+      "recordType": "interview-plan",
+      "titleField": "title",
+      "resultingState": "draft",
+      "requiredFields": [
+        "title"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Interview plan title, stored as non-empty plain text.",
+            "examples": [
+              "Sample Interview plan title"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_interview_plan_create",
+      "productMcpToolName": "talentledger_interview_plan_create",
+      "productCliExample": "talentledger action interview-plan-create '{\"title\":\"Sample Interview plan title\"}'",
+      "exampleInput": {
+        "title": "Sample Interview plan title"
+      }
+    },
+    {
+      "id": "job-list",
+      "moduleId": "hire",
+      "title": "List hiring jobs",
+      "description": "List workspace-owned jobs without exposing another tenant's recruiting data.",
+      "operation": "read",
+      "recordType": "job",
+      "requiredFields": [],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "additionalProperties": false
+      },
+      "requiredScope": "read",
+      "backendMcpToolName": "hire_job_list",
+      "productMcpToolName": "talentledger_job_list",
+      "productCliExample": "talentledger action job-list '{}'",
+      "exampleInput": {}
+    },
+    {
+      "id": "job-draft",
+      "moduleId": "hire",
+      "title": "Draft hiring job",
+      "description": "Create a content-addressed job and immutable pipeline snapshot before approval.",
+      "operation": "command",
+      "recordType": "job",
+      "requiredFields": [
+        "title",
+        "description",
+        "pipelineStages",
+        "privacyNoticeVersion"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "pipelineStages",
+          "privacyNoticeVersion"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Job title.",
+            "examples": [
+              "Senior product engineer"
+            ],
+            "maxLength": 240
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Plain-text job description.",
+            "examples": [
+              "Build and operate reliable customer-facing products."
+            ],
+            "maxLength": 20000
+          },
+          "pipelineStages": {
+            "type": "array",
+            "description": "Ordered unique non-terminal pipeline stage keys.",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Pipeline stage key.",
+              "examples": [
+                "review"
+              ],
+              "pattern": "^[a-z][a-z0-9-]{1,39}$",
+              "maxLength": 40
+            },
+            "minItems": 1,
+            "maxItems": 30,
+            "uniqueItems": true,
+            "examples": [
+              [
+                "review"
+              ]
+            ]
+          },
+          "privacyNoticeVersion": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact candidate privacy-notice version.",
+            "examples": [
+              "privacy-v1"
+            ],
+            "maxLength": 120
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_job_draft",
+      "productMcpToolName": "talentledger_job_draft",
+      "productCliExample": "talentledger action job-draft '{\"title\":\"Senior product engineer\",\"description\":\"Build and operate reliable customer-facing products.\",\"pipelineStages\":[\"review\"],\"privacyNoticeVersion\":\"privacy-v1\"}'",
+      "exampleInput": {
+        "title": "Senior product engineer",
+        "description": "Build and operate reliable customer-facing products.",
+        "pipelineStages": [
+          "review"
+        ],
+        "privacyNoticeVersion": "privacy-v1"
+      }
+    },
+    {
+      "id": "job-approve",
+      "moduleId": "hire",
+      "title": "Approve hiring job",
+      "description": "Approve only the exact content hash of a draft job without publishing it.",
+      "operation": "command",
+      "recordType": "job",
+      "requiredFields": [
+        "jobId",
+        "contentHash"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "jobId",
+          "contentHash"
+        ],
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Draft job UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "contentHash": {
+            "type": "string",
+            "minLength": 64,
+            "description": "Lowercase SHA-256 digest of the exact reviewed content.",
+            "examples": [
+              "0000000000000000000000000000000000000000000000000000000000000000"
+            ],
+            "pattern": "^[a-f0-9]{64}$",
+            "maxLength": 64
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_job_approve",
+      "productMcpToolName": "talentledger_job_approve",
+      "productCliExample": "talentledger action job-approve '{\"jobId\":\"00000000-0000-4000-8000-000000000001\",\"contentHash\":\"0000000000000000000000000000000000000000000000000000000000000000\"}'",
+      "exampleInput": {
+        "jobId": "00000000-0000-4000-8000-000000000001",
+        "contentHash": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "id": "job-publish",
+      "moduleId": "hire",
+      "title": "Publish hiring job",
+      "description": "Publish the exact approved job version with idempotency and no autonomous content changes.",
+      "operation": "command",
+      "recordType": "job",
+      "requiredFields": [
+        "jobId",
+        "contentHash",
+        "idempotencyKey"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "jobId",
+          "contentHash",
+          "idempotencyKey"
+        ],
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Approved job UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "contentHash": {
+            "type": "string",
+            "minLength": 64,
+            "description": "Lowercase SHA-256 digest of the exact reviewed content.",
+            "examples": [
+              "0000000000000000000000000000000000000000000000000000000000000000"
+            ],
+            "pattern": "^[a-f0-9]{64}$",
+            "maxLength": 64
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Caller-generated idempotency key for replay-safe mutation.",
+            "examples": [
+              "request.sample-0001"
+            ],
+            "pattern": "^[A-Za-z0-9._:-]{16,200}$",
+            "maxLength": 200
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_job_publish",
+      "productMcpToolName": "talentledger_job_publish",
+      "productCliExample": "talentledger action job-publish '{\"jobId\":\"00000000-0000-4000-8000-000000000001\",\"contentHash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"idempotencyKey\":\"request.sample-0001\"}'",
+      "exampleInput": {
+        "jobId": "00000000-0000-4000-8000-000000000001",
+        "contentHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "idempotencyKey": "request.sample-0001"
+      }
+    },
+    {
+      "id": "application-list",
+      "moduleId": "hire",
+      "title": "List job applications",
+      "description": "List tenant-scoped applications bound to one job.",
+      "operation": "read",
+      "recordType": "application",
+      "requiredFields": [
+        "jobId"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "jobId"
+        ],
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hiring job UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "read",
+      "backendMcpToolName": "hire_application_list",
+      "productMcpToolName": "talentledger_application_list",
+      "productCliExample": "talentledger action application-list '{\"jobId\":\"00000000-0000-4000-8000-000000000001\"}'",
+      "exampleInput": {
+        "jobId": "00000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "id": "application-get",
+      "moduleId": "hire",
+      "title": "Read hiring application",
+      "description": "Read one tenant-scoped application and its immutable version bindings.",
+      "operation": "read",
+      "recordType": "application",
+      "requiredFields": [
+        "applicationId"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "applicationId"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hiring application UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "read",
+      "backendMcpToolName": "hire_application_get",
+      "productMcpToolName": "talentledger_application_get",
+      "productCliExample": "talentledger action application-get '{\"applicationId\":\"00000000-0000-4000-8000-000000000001\"}'",
+      "exampleInput": {
+        "applicationId": "00000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "id": "application-submit",
+      "moduleId": "hire",
+      "title": "Submit hiring application",
+      "description": "Create candidate, version-bound application, consent evidence, and an append-only event after protected-field validation.",
+      "operation": "command",
+      "recordType": "application",
+      "requiredFields": [
+        "jobId",
+        "candidateName",
+        "email",
+        "consent",
+        "answers"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "jobId",
+          "candidateName",
+          "email",
+          "consent",
+          "answers"
+        ],
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Published hiring job UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "candidateName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Candidate-provided name.",
+            "examples": [
+              "Alex Candidate"
+            ],
+            "maxLength": 240
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Candidate email address.",
+            "examples": [
+              "alex@example.com"
+            ],
+            "format": "email",
+            "maxLength": 320
+          },
+          "consent": {
+            "type": "boolean",
+            "const": true,
+            "description": "Explicit consent to the exact job privacy notice.",
+            "examples": [
+              true
+            ]
+          },
+          "answers": {
+            "type": "array",
+            "description": "Candidate-supplied answers without protected or inferred traits.",
+            "items": {
+              "type": "object",
+              "description": "Candidate-supplied answer. Additional safe response fields are retained by the runtime.",
+              "required": [
+                "key"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Application question key.",
+                  "examples": [
+                    "portfolio"
+                  ],
+                  "maxLength": 100
+                }
+              },
+              "additionalProperties": true,
+              "examples": [
+                {
+                  "key": "portfolio",
+                  "value": "https://example.com/work"
+                }
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "examples": [
+              [
+                {
+                  "key": "portfolio",
+                  "value": "https://example.com/work"
+                }
+              ]
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_application_submit",
+      "productMcpToolName": "talentledger_application_submit",
+      "productCliExample": "talentledger action application-submit '{\"jobId\":\"00000000-0000-4000-8000-000000000001\",\"candidateName\":\"Alex Candidate\",\"email\":\"alex@example.com\",\"consent\":true,\"answers\":[{\"key\":\"portfolio\",\"value\":\"https://example.com/work\"}]}'",
+      "exampleInput": {
+        "jobId": "00000000-0000-4000-8000-000000000001",
+        "candidateName": "Alex Candidate",
+        "email": "alex@example.com",
+        "consent": true,
+        "answers": [
+          {
+            "key": "portfolio",
+            "value": "https://example.com/work"
+          }
+        ]
+      }
+    },
+    {
+      "id": "resume-extract",
+      "moduleId": "hire",
+      "title": "Propose resume extraction",
+      "description": "Queue a cited extraction proposal only for a clean private resume document; it cannot change candidate facts.",
+      "operation": "ai",
+      "goalField": "instruction",
+      "requiredFields": [
+        "instruction",
+        "applicationId",
+        "resumeDocumentId"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "instruction",
+          "applicationId",
+          "resumeDocumentId"
+        ],
+        "properties": {
+          "instruction": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Bounded instruction for a proposal-only model run.",
+            "examples": [
+              "Explain the reviewed evidence without adding unsupported facts."
+            ],
+            "maxLength": 4000
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hiring application UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "resumeDocumentId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Clean private resume document UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "ai",
+      "backendMcpToolName": "hire_resume_extract",
+      "productMcpToolName": "talentledger_resume_extract",
+      "productCliExample": "talentledger action resume-extract '{\"instruction\":\"Explain the reviewed evidence without adding unsupported facts.\",\"applicationId\":\"00000000-0000-4000-8000-000000000001\",\"resumeDocumentId\":\"00000000-0000-4000-8000-000000000001\"}'",
+      "exampleInput": {
+        "instruction": "Explain the reviewed evidence without adding unsupported facts.",
+        "applicationId": "00000000-0000-4000-8000-000000000001",
+        "resumeDocumentId": "00000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "id": "candidate-summarize",
+      "moduleId": "hire",
+      "title": "Propose candidate summary",
+      "description": "Queue a review-only summary grounded only in selected application evidence.",
+      "operation": "ai",
+      "goalField": "instruction",
+      "requiredFields": [
+        "instruction",
+        "applicationId",
+        "evidenceIds"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "instruction",
+          "applicationId",
+          "evidenceIds"
+        ],
+        "properties": {
+          "instruction": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Bounded instruction for a proposal-only model run.",
+            "examples": [
+              "Explain the reviewed evidence without adding unsupported facts."
+            ],
+            "maxLength": 4000
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hiring application UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "description": "One to fifty selected application evidence UUIDs.",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Workspace-owned record UUID.",
+              "examples": [
+                "00000000-0000-4000-8000-000000000001"
+              ],
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true,
+            "examples": [
+              [
+                "00000000-0000-4000-8000-000000000001"
+              ]
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "ai",
+      "backendMcpToolName": "hire_candidate_summarize",
+      "productMcpToolName": "talentledger_candidate_summarize",
+      "productCliExample": "talentledger action candidate-summarize '{\"instruction\":\"Explain the reviewed evidence without adding unsupported facts.\",\"applicationId\":\"00000000-0000-4000-8000-000000000001\",\"evidenceIds\":[\"00000000-0000-4000-8000-000000000001\"]}'",
+      "exampleInput": {
+        "instruction": "Explain the reviewed evidence without adding unsupported facts.",
+        "applicationId": "00000000-0000-4000-8000-000000000001",
+        "evidenceIds": [
+          "00000000-0000-4000-8000-000000000001"
+        ]
+      }
+    },
+    {
+      "id": "transition-preview",
+      "moduleId": "hire",
+      "title": "Preview application transition",
+      "description": "Validate a non-terminal stage transition and return its exact confirmation hash without mutation.",
+      "operation": "read",
+      "recordType": "application",
+      "requiredFields": [
+        "applicationId",
+        "toStage"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "applicationId",
+          "toStage"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hiring application UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "toStage": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Declared non-terminal pipeline stage key.",
+            "examples": [
+              "review"
+            ],
+            "pattern": "^[a-z][a-z0-9-]{1,39}$",
+            "maxLength": 40
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "read",
+      "backendMcpToolName": "hire_transition_preview",
+      "productMcpToolName": "talentledger_transition_preview",
+      "productCliExample": "talentledger action transition-preview '{\"applicationId\":\"00000000-0000-4000-8000-000000000001\",\"toStage\":\"review\"}'",
+      "exampleInput": {
+        "applicationId": "00000000-0000-4000-8000-000000000001",
+        "toStage": "review"
+      }
+    },
+    {
+      "id": "transition-apply",
+      "moduleId": "hire",
+      "title": "Apply application transition",
+      "description": "Apply an exact-version non-terminal transition and append an immutable event; terminal outcomes are always denied to this API surface.",
+      "operation": "command",
+      "recordType": "application",
+      "requiredFields": [
+        "applicationId",
+        "toStage",
+        "expectedVersion",
+        "reason",
+        "previewHash"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "applicationId",
+          "toStage",
+          "expectedVersion",
+          "reason",
+          "previewHash"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hiring application UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "toStage": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Declared non-terminal pipeline stage key.",
+            "examples": [
+              "review"
+            ],
+            "pattern": "^[a-z][a-z0-9-]{1,39}$",
+            "maxLength": 40
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Current application version.",
+            "examples": [
+              1
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Auditable transition reason.",
+            "examples": [
+              "Move to structured review after evidence check."
+            ],
+            "maxLength": 2000
+          },
+          "previewHash": {
+            "type": "string",
+            "minLength": 64,
+            "description": "Lowercase SHA-256 digest returned by the matching preview.",
+            "examples": [
+              "0000000000000000000000000000000000000000000000000000000000000000"
+            ],
+            "pattern": "^[a-f0-9]{64}$",
+            "maxLength": 64
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_transition_apply",
+      "productMcpToolName": "talentledger_transition_apply",
+      "productCliExample": "talentledger action transition-apply '{\"applicationId\":\"00000000-0000-4000-8000-000000000001\",\"toStage\":\"review\",\"expectedVersion\":1,\"reason\":\"Move to structured review after evidence check.\",\"previewHash\":\"0000000000000000000000000000000000000000000000000000000000000000\"}'",
+      "exampleInput": {
+        "applicationId": "00000000-0000-4000-8000-000000000001",
+        "toStage": "review",
+        "expectedVersion": 1,
+        "reason": "Move to structured review after evidence check.",
+        "previewHash": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "id": "interview-schedule",
+      "moduleId": "hire",
+      "title": "Schedule interview",
+      "description": "Create a tenant-scoped interview from an active application and workspace interview plan.",
+      "operation": "command",
+      "recordType": "interview",
+      "requiredFields": [
+        "applicationId",
+        "planId",
+        "scheduledAt"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "applicationId",
+          "planId",
+          "scheduledAt"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Active hiring application UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Workspace interview-plan UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Scheduled interview date-time.",
+            "examples": [
+              "2030-01-01T12:00:00Z"
+            ],
+            "format": "date-time",
+            "maxLength": 40
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_interview_schedule",
+      "productMcpToolName": "talentledger_interview_schedule",
+      "productCliExample": "talentledger action interview-schedule '{\"applicationId\":\"00000000-0000-4000-8000-000000000001\",\"planId\":\"00000000-0000-4000-8000-000000000001\",\"scheduledAt\":\"2030-01-01T12:00:00Z\"}'",
+      "exampleInput": {
+        "applicationId": "00000000-0000-4000-8000-000000000001",
+        "planId": "00000000-0000-4000-8000-000000000001",
+        "scheduledAt": "2030-01-01T12:00:00Z"
+      }
+    },
+    {
+      "id": "scorecard-submit",
+      "moduleId": "hire",
+      "title": "Submit immutable scorecard",
+      "description": "Append one evidence-based interviewer scorecard; no aggregate hiring decision is calculated.",
+      "operation": "command",
+      "recordType": "scorecard",
+      "requiredFields": [
+        "interviewId",
+        "interviewerId",
+        "ratings",
+        "evidenceNotes"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "interviewId",
+          "interviewerId",
+          "ratings",
+          "evidenceNotes"
+        ],
+        "properties": {
+          "interviewId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Interview UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "interviewerId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Workspace-local interviewer identifier.",
+            "examples": [
+              "interviewer-123"
+            ],
+            "maxLength": 64
+          },
+          "ratings": {
+            "type": "array",
+            "description": "One to fifty evidence-linked ratings.",
+            "items": {
+              "type": "object",
+              "description": "Evidence-linked structured interview rating.",
+              "required": [
+                "criterion",
+                "rating",
+                "evidence"
+              ],
+              "properties": {
+                "criterion": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Competency or criterion being rated.",
+                  "examples": [
+                    "Problem solving"
+                  ],
+                  "maxLength": 200
+                },
+                "rating": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5,
+                  "description": "Whole-number rating from one to five.",
+                  "examples": [
+                    4
+                  ]
+                },
+                "evidence": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Observed evidence supporting the rating.",
+                  "examples": [
+                    "Explained tradeoffs using a concrete example."
+                  ],
+                  "maxLength": 2000
+                }
+              },
+              "additionalProperties": false,
+              "examples": [
+                {
+                  "criterion": "Problem solving",
+                  "rating": 4,
+                  "evidence": "Explained tradeoffs using a concrete example."
+                }
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "examples": [
+              [
+                {
+                  "criterion": "Problem solving",
+                  "rating": 4,
+                  "evidence": "Explained tradeoffs using a concrete example."
+                }
+              ]
+            ]
+          },
+          "evidenceNotes": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Plain-text evidence notes.",
+            "examples": [
+              "Candidate described the constraints and alternatives."
+            ],
+            "maxLength": 10000
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_scorecard_submit",
+      "productMcpToolName": "talentledger_scorecard_submit",
+      "productCliExample": "talentledger action scorecard-submit '{\"interviewId\":\"00000000-0000-4000-8000-000000000001\",\"interviewerId\":\"interviewer-123\",\"ratings\":[{\"criterion\":\"Problem solving\",\"rating\":4,\"evidence\":\"Explained tradeoffs using a concrete example.\"}],\"evidenceNotes\":\"Candidate described the constraints and alternatives.\"}'",
+      "exampleInput": {
+        "interviewId": "00000000-0000-4000-8000-000000000001",
+        "interviewerId": "interviewer-123",
+        "ratings": [
+          {
+            "criterion": "Problem solving",
+            "rating": 4,
+            "evidence": "Explained tradeoffs using a concrete example."
+          }
+        ],
+        "evidenceNotes": "Candidate described the constraints and alternatives."
+      }
+    },
+    {
+      "id": "decision-record",
+      "moduleId": "hire",
+      "title": "Record non-terminal review decision",
+      "description": "Append a non-terminal review decision; hired and not-selected outcomes remain unavailable to API and agent tokens.",
+      "operation": "command",
+      "recordType": "decision",
+      "requiredFields": [
+        "applicationId",
+        "decisionType",
+        "reason",
+        "evidenceIds",
+        "expectedVersion"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "applicationId",
+          "decisionType",
+          "reason",
+          "evidenceIds",
+          "expectedVersion"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hiring application UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          },
+          "decisionType": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Supported non-terminal review decision.",
+            "examples": [
+              "continue-review"
+            ],
+            "enum": [
+              "continue-review",
+              "pause-review",
+              "request-more-evidence"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Auditable decision reason.",
+            "examples": [
+              "Continue structured review using the selected evidence."
+            ],
+            "maxLength": 2000
+          },
+          "evidenceIds": {
+            "type": "array",
+            "description": "One to fifty selected hiring evidence UUIDs.",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Workspace-owned record UUID.",
+              "examples": [
+                "00000000-0000-4000-8000-000000000001"
+              ],
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true,
+            "examples": [
+              [
+                "00000000-0000-4000-8000-000000000001"
+              ]
+            ]
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Current application version.",
+            "examples": [
+              1
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_decision_record",
+      "productMcpToolName": "talentledger_decision_record",
+      "productCliExample": "talentledger action decision-record '{\"applicationId\":\"00000000-0000-4000-8000-000000000001\",\"decisionType\":\"continue-review\",\"reason\":\"Continue structured review using the selected evidence.\",\"evidenceIds\":[\"00000000-0000-4000-8000-000000000001\"],\"expectedVersion\":1}'",
+      "exampleInput": {
+        "applicationId": "00000000-0000-4000-8000-000000000001",
+        "decisionType": "continue-review",
+        "reason": "Continue structured review using the selected evidence.",
+        "evidenceIds": [
+          "00000000-0000-4000-8000-000000000001"
+        ],
+        "expectedVersion": 1
+      }
+    },
+    {
+      "id": "candidate-export",
+      "moduleId": "hire",
+      "title": "Create candidate export",
+      "description": "Freeze a tenant-scoped portable export manifest for one candidate and linked recruiting evidence.",
+      "operation": "command",
+      "recordType": "export",
+      "requiredFields": [
+        "candidateId"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "candidateId"
+        ],
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Candidate UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_candidate_export",
+      "productMcpToolName": "talentledger_candidate_export",
+      "productCliExample": "talentledger action candidate-export '{\"candidateId\":\"00000000-0000-4000-8000-000000000001\"}'",
+      "exampleInput": {
+        "candidateId": "00000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "id": "deletion-preview",
+      "moduleId": "hire",
+      "title": "Preview candidate deletion",
+      "description": "Create a content-addressed deletion plan without deleting or hiding any candidate record.",
+      "operation": "command",
+      "recordType": "deletion-request",
+      "requiredFields": [
+        "candidateId"
+      ],
+      "engine": "legacy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "candidateId"
+        ],
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Candidate UUID.",
+            "examples": [
+              "00000000-0000-4000-8000-000000000001"
+            ],
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "requiredScope": "write",
+      "backendMcpToolName": "hire_deletion_preview",
+      "productMcpToolName": "talentledger_deletion_preview",
+      "productCliExample": "talentledger action deletion-preview '{\"candidateId\":\"00000000-0000-4000-8000-000000000001\"}'",
+      "exampleInput": {
+        "candidateId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  ]
+}
