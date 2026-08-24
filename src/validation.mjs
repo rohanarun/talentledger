@@ -13,6 +13,19 @@ function fail(path, message) {
   throw new InputValidationError(path + " " + message);
 }
 
+function sameJsonValue(left, right) {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right) &&
+      left.length === right.length && left.every((item, index) => sameJsonValue(item, right[index]));
+  }
+  if (!isPlainObject(left) || !isPlainObject(right)) return false;
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+  return leftKeys.length === rightKeys.length &&
+    leftKeys.every((key, index) => key === rightKeys[index] && sameJsonValue(left[key], right[key]));
+}
+
 function formatIsValid(format, value) {
   if (typeof format !== "string") return true;
   if (format === "uuid") return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -51,12 +64,18 @@ export function validateInput(schema, value, path = "input") {
       break;
     case "object": {
       if (!isPlainObject(value)) fail(path, "must be an object.");
+      const keys = Object.keys(value);
+      if (schema.minProperties !== undefined && keys.length < schema.minProperties) fail(path, "must contain at least " + schema.minProperties + " propert" + (schema.minProperties === 1 ? "y." : "ies."));
+      if (schema.maxProperties !== undefined && keys.length > schema.maxProperties) fail(path, "must contain at most " + schema.maxProperties + " propert" + (schema.maxProperties === 1 ? "y." : "ies."));
       for (const key of schema.required ?? []) {
         if (!(key in value)) fail(path + "." + key, "is required.");
       }
-      if (schema.additionalProperties === false) {
-        const allowed = new Set(Object.keys(schema.properties ?? {}));
-        for (const key of Object.keys(value)) if (!allowed.has(key)) fail(path + "." + key, "is not permitted.");
+      const declared = new Set(Object.keys(schema.properties ?? {}));
+      for (const key of keys) {
+        if (schema.propertyNames) validateInput({ ...schema.propertyNames, type: "string" }, key, path + " property " + JSON.stringify(key));
+        if (declared.has(key)) continue;
+        if (schema.additionalProperties === false) fail(path + "." + key, "is not permitted.");
+        if (isPlainObject(schema.additionalProperties)) validateInput(schema.additionalProperties, value[key], path + "." + key);
       }
       for (const [key, child] of Object.entries(schema.properties ?? {})) {
         if (key in value) validateInput(child, value[key], path + "." + key);
@@ -67,6 +86,11 @@ export function validateInput(schema, value, path = "input") {
       if (!Array.isArray(value)) fail(path, "must be an array.");
       if (schema.minItems !== undefined && value.length < schema.minItems) fail(path, "must contain at least " + schema.minItems + " item(s).");
       if (schema.maxItems !== undefined && value.length > schema.maxItems) fail(path, "must contain at most " + schema.maxItems + " item(s).");
+      if (schema.uniqueItems === true) {
+        for (let index = 0; index < value.length; index += 1) {
+          if (value.slice(0, index).some((item) => sameJsonValue(item, value[index]))) fail(path + "[" + index + "]", "duplicates an earlier item but items must be unique.");
+        }
+      }
       if (schema.items) value.forEach((item, index) => validateInput(schema.items, item, path + "[" + index + "]"));
       break;
     case "string":

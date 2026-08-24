@@ -1,6 +1,6 @@
 {
   "name": "@managed-oss/talentledger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.",
   "type": "module",
   "license": "MIT",

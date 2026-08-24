@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "release": {
-    "productVersion": "0.1.0",
+    "productVersion": "0.1.1",
     "backendRelease": "v0.4.2",
     "backendCommit": "20c4a704c77cbbbff1da995e1d91b937625a8aa4",
     "backendSourceSnapshotSha256": "d0b7b1079d4924eb7369c788a979a707d45bb63470290e6ac33ee5662d78f69f",
