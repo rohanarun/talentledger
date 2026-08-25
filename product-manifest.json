@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "release": {
-    "productVersion": "0.1.1",
+    "productVersion": "0.2.0",
     "backendRelease": "v0.4.2",
     "backendCommit": "20c4a704c77cbbbff1da995e1d91b937625a8aa4",
     "backendSourceSnapshotSha256": "d0b7b1079d4924eb7369c788a979a707d45bb63470290e6ac33ee5662d78f69f",
@@ -66,6 +66,200 @@
   "cleanRoom": {
     "statement": "Original clean-room implementation of the recruiting software category, designed and written independently.",
     "sourceBoundary": "Public category behavior informed requirements; implementation and product identity are original."
+  },
+  "experience": {
+    "releaseBoundary": "Complete for every typed action declared by this product manifest; it does not claim feature parity with unrelated third-party products.",
+    "headline": "Versioned jobs",
+    "primaryActionId": "job-draft",
+    "quickActionIds": [
+      "interview-plan-create",
+      "job-list",
+      "job-draft",
+      "job-approve"
+    ],
+    "navigation": [
+      "Overview",
+      "Records",
+      "Workflows",
+      "AI assistance",
+      "Settings"
+    ],
+    "workflowGroups": [
+      {
+        "name": "Create and capture",
+        "actionIds": [
+          "interview-plan-create",
+          "job-draft",
+          "application-submit",
+          "interview-schedule",
+          "scorecard-submit",
+          "decision-record",
+          "candidate-export"
+        ]
+      },
+      {
+        "name": "Operate and update",
+        "actionIds": [
+          "transition-apply"
+        ]
+      },
+      {
+        "name": "Review and approve",
+        "actionIds": [
+          "job-approve",
+          "job-publish",
+          "transition-preview",
+          "deletion-preview"
+        ]
+      },
+      {
+        "name": "Inspect and report",
+        "actionIds": [
+          "job-list",
+          "application-list",
+          "application-get"
+        ]
+      },
+      {
+        "name": "AI assistance",
+        "actionIds": [
+          "resume-extract",
+          "candidate-summarize"
+        ]
+      }
+    ],
+    "metrics": [
+      {
+        "label": "Typed actions",
+        "value": 17
+      },
+      {
+        "label": "Record types",
+        "value": 15
+      },
+      {
+        "label": "AI workflows",
+        "value": 0
+      },
+      {
+        "label": "Review gates",
+        "value": 4
+      }
+    ],
+    "sampleRecords": [
+      {
+        "id": "demo-hire-01",
+        "moduleId": "hire",
+        "recordType": "job",
+        "title": "Job Launch",
+        "state": "active",
+        "createdAt": "2026-08-18T13:30:00.000Z",
+        "updatedAt": "2026-08-25T13:15:00.000Z",
+        "data": {
+          "owner": "Operations",
+          "evidenceStatus": "verified",
+          "nextStep": "Create interview plan"
+        }
+      },
+      {
+        "id": "demo-hire-02",
+        "moduleId": "hire",
+        "recordType": "pipeline",
+        "title": "Pipeline Operations",
+        "state": "in review",
+        "createdAt": "2026-08-19T13:30:00.000Z",
+        "updatedAt": "2026-08-25T12:15:00.000Z",
+        "data": {
+          "owner": "Product",
+          "evidenceStatus": "current",
+          "nextStep": "List hiring jobs"
+        }
+      },
+      {
+        "id": "demo-hire-03",
+        "moduleId": "hire",
+        "recordType": "candidate",
+        "title": "Candidate Evidence",
+        "state": "ready",
+        "createdAt": "2026-08-20T13:30:00.000Z",
+        "updatedAt": "2026-08-25T11:15:00.000Z",
+        "data": {
+          "owner": "Operations",
+          "evidenceStatus": "current",
+          "nextStep": "Draft hiring job"
+        }
+      },
+      {
+        "id": "demo-hire-04",
+        "moduleId": "hire",
+        "recordType": "application",
+        "title": "Application Review",
+        "state": "scheduled",
+        "createdAt": "2026-08-21T13:30:00.000Z",
+        "updatedAt": "2026-08-25T10:15:00.000Z",
+        "data": {
+          "owner": "Product",
+          "evidenceStatus": "verified",
+          "nextStep": "Approve hiring job"
+        }
+      },
+      {
+        "id": "demo-hire-05",
+        "moduleId": "hire",
+        "recordType": "resume-document",
+        "title": "Resume Document Pilot",
+        "state": "draft",
+        "createdAt": "2026-08-22T13:30:00.000Z",
+        "updatedAt": "2026-08-25T09:15:00.000Z",
+        "data": {
+          "owner": "Operations",
+          "evidenceStatus": "current",
+          "nextStep": "Publish hiring job"
+        }
+      },
+      {
+        "id": "demo-hire-06",
+        "moduleId": "hire",
+        "recordType": "application-event",
+        "title": "Application Event Archive",
+        "state": "complete",
+        "createdAt": "2026-08-23T13:30:00.000Z",
+        "updatedAt": "2026-08-25T08:15:00.000Z",
+        "data": {
+          "owner": "Product",
+          "evidenceStatus": "current",
+          "nextStep": "List job applications"
+        }
+      },
+      {
+        "id": "demo-hire-07",
+        "moduleId": "hire",
+        "recordType": "interview-plan",
+        "title": "Interview Plan Launch",
+        "state": "active",
+        "createdAt": "2026-08-24T13:30:00.000Z",
+        "updatedAt": "2026-08-25T07:15:00.000Z",
+        "data": {
+          "owner": "Operations",
+          "evidenceStatus": "verified",
+          "nextStep": "Read hiring application"
+        }
+      },
+      {
+        "id": "demo-hire-08",
+        "moduleId": "hire",
+        "recordType": "interview",
+        "title": "Interview Operations",
+        "state": "in review",
+        "createdAt": "2026-08-25T13:30:00.000Z",
+        "updatedAt": "2026-08-25T06:15:00.000Z",
+        "data": {
+          "owner": "Product",
+          "evidenceStatus": "current",
+          "nextStep": "Submit hiring application"
+        }
+      }
+    ]
   },
   "actions": [
     {

@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { clientFromEnvironment } from "./client.mjs";
+import { DemoProductClient } from "./demo-client.mjs";
 import { manifest } from "./manifest.mjs";
 
 const directory = dirname(fileURLToPath(import.meta.url));
@@ -68,7 +69,7 @@ export function createProductWebServer({ client, webKey }) {
         const content = await readFile(join(webRoot, file));
         response.writeHead(200, {
           "Content-Type": contentType,
-          "Cache-Control": file === "index.html" ? "no-store" : "public, max-age=300",
+          "Cache-Control": "no-store",
           "Content-Security-Policy": "default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'",
           "X-Content-Type-Options": "nosniff",
           "Referrer-Policy": "no-referrer",
@@ -101,12 +102,13 @@ export async function startWebServer(env = process.env) {
   const host = env.HOST ?? "127.0.0.1";
   const port = Number(env.PORT ?? 4173);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("PORT must be an integer from 1 to 65535.");
-  const server = createProductWebServer({ client: clientFromEnvironment(env), webKey: webKeyFromEnvironment(env) });
+  const demoMode = env.PRODUCT_DEMO_MODE === "true";
+  const server = createProductWebServer({ client: demoMode ? new DemoProductClient() : clientFromEnvironment(env), webKey: webKeyFromEnvironment(env) });
   await new Promise((resolve, reject) => {
     server.once("error", reject);
     server.listen(port, host, resolve);
   });
-  process.stdout.write(manifest.product.name + " web UI listening on http://" + host + ":" + port + "\n");
+  process.stdout.write(manifest.product.name + " web UI listening on http://" + host + ":" + port + (demoMode ? " in sample workspace mode" : "") + "\n");
   return server;
 }
 

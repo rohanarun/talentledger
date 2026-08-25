@@ -4,58 +4,132 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>TalentLedger</title>
-  <link rel="stylesheet" href="/styles.css">
+  <meta name="description" content="Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.">
+  <title>TalentLedger — Workspace</title>
+  <link rel="stylesheet" href="/styles.css?v=0.2.0">
 </head>
-<body style="--accent: #b493ff; --accent-dark: #6543a8">
-  <main>
-    <nav>
-      <a class="brand" href="/" aria-label="TalentLedger home"><span class="mark"></span><span id="product-name">TalentLedger</span></a>
-      <div class="state"><span class="state-dot"></span><span id="connection-state" data-connected="false">Disconnected</span></div>
-    </nav>
+<body>
+  <div class="busy-overlay" aria-live="polite"><span class="busy-spinner"></span><span id="busy-label">Working</span></div>
+  <div id="toast-root" class="toast-root" aria-live="polite"></div>
 
-    <header>
-      <div>
-        <p class="eyebrow">PRIVATE BUSINESS WORKSPACE</p>
-        <h1 id="tagline">Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.</h1>
+  <aside class="side-nav">
+    <a class="brand" href="/" aria-label="TalentLedger home">
+      <span class="mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span><strong id="product-name">TalentLedger</strong><small id="product-category">Recruiting</small></span>
+    </a>
+    <nav aria-label="Product workspace">
+      <button type="button" data-view="overview" data-active="true"><span class="nav-glyph">O</span>Overview</button>
+      <button type="button" data-view="records"><span class="nav-glyph">R</span>Records</button>
+      <button type="button" data-view="workflows"><span class="nav-glyph">W</span>Workflows</button>
+      <button type="button" data-view="ai"><span class="nav-glyph">A</span>AI assistance</button>
+      <button type="button" data-view="settings"><span class="nav-glyph">S</span>Settings</button>
+    </nav>
+    <div class="nav-footer">
+      <div class="connection-state"><span class="state-dot"></span><span id="connection-state" data-connected="false">Connect</span></div>
+      <button id="connect-trigger" class="connect-button" type="button">Connect workspace</button>
+      <p>Private API access stays on this server.</p>
+    </div>
+  </aside>
+
+  <main class="workspace-shell">
+    <header class="topbar">
+      <div class="breadcrumbs"><span id="workspace-name">Private workspace</span><span>/</span><strong id="current-view">Overview</strong></div>
+      <div class="topbar-actions">
+        <label class="global-search"><span>Search</span><input id="global-search" type="search" placeholder="Search records"><kbd>⌘ K</kbd></label>
+        <span id="module-plan" class="plan-label">starter plan</span>
       </div>
-      <dl>
-        <div><dt>Category</dt><dd id="category">Recruiting</dd></div>
-        <div><dt>Hosted plan</dt><dd id="plan">starter</dd></div>
-        <div><dt>Typed actions</dt><dd id="action-count">17</dd></div>
-        <div><dt>Module</dt><dd id="module-id">hire</dd></div>
-      </dl>
     </header>
 
-    <section class="connection" aria-labelledby="connection-title">
-      <div><h2 id="connection-title">Connect this browser</h2><p>The backend API token stays server-side. Enter only the separate web access key configured for this UI.</p></div>
-      <div class="connection-controls">
-        <label for="web-key">Web access key</label>
-        <input id="web-key" type="password" autocomplete="current-password" placeholder="At least 24 characters">
-        <button id="connect" class="primary">Connect</button>
-        <button id="disconnect" class="quiet">Clear</button>
-      </div>
+    <div id="sample-banner" class="sample-banner" hidden><strong>Sample workspace</strong><span>This is the actual product UI using local seeded data. Connect your backend for durable shared records.</span></div>
+
+    <section id="view-overview" class="view overview-view">
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">hire WORKSPACE</p>
+          <h1 id="hero-title">Versioned jobs</h1>
+          <p id="hero-description">Product workspace</p>
+          <div class="hero-actions">
+            <button id="primary-action" class="primary" type="button"><span id="primary-action-label">Start workflow</span><span aria-hidden="true">↗</span></button>
+            <button id="view-all-records" class="secondary" type="button">Browse records</button>
+          </div>
+        </div>
+        <aside class="hero-signal" aria-label="Workspace signal">
+          <div class="signal-visual" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <p>Typed operations</p>
+          <strong>17</strong>
+          <small>Every workflow is schema-validated, scoped, and recorded by the shared backend.</small>
+        </aside>
+      </section>
+
+      <section id="metric-grid" class="metric-grid" aria-label="Workspace metrics"></section>
+
+      <section class="overview-grid">
+        <article class="panel recent-panel">
+          <div class="panel-heading"><div><p class="kicker">Current work</p><h2>Recent records</h2></div><button id="refresh-records" type="button" class="text-button">Refresh</button></div>
+          <div id="recent-records" class="recent-records"></div>
+        </article>
+        <article class="panel action-panel">
+          <div class="panel-heading"><div><p class="kicker">Move work forward</p><h2>Quick workflows</h2></div></div>
+          <div id="quick-actions" class="quick-actions"></div>
+        </article>
+        <article class="panel activity-panel">
+          <div class="panel-heading"><div><p class="kicker">Evidence trail</p><h2>Recent activity</h2></div></div>
+          <div id="activity-list" class="activity-list"></div>
+        </article>
+      </section>
     </section>
 
-    <section class="workspace-grid">
-      <article>
-        <div class="article-heading"><div><h2>Workspace</h2><p>Inspect or enable the product-scoped module.</p></div></div>
-        <div class="button-row"><button id="workspace">Read workspace</button><button id="enable">Enable product</button><button id="records">List records</button></div>
-      </article>
-      <article class="action-card">
-        <div class="article-heading"><div><h2>Typed action</h2><p id="action-description"></p></div></div>
-        <label for="action">Action</label>
-        <select id="action"></select>
-        <label for="action-input">JSON input</label>
-        <textarea id="action-input" spellcheck="false"></textarea>
-        <button id="run-action" class="primary">Run scoped action</button>
-      </article>
-      <article class="output-card">
-        <div class="article-heading"><div><h2>Result</h2><p>API responses and validation failures appear here.</p></div></div>
-        <pre id="output" data-kind="neutral">Connect to read the workspace.</pre>
-      </article>
+    <section id="view-records" class="view" hidden>
+      <div class="view-heading"><div><p class="eyebrow">DURABLE WORK</p><h1>Records</h1><p>Search, filter, and inspect product-scoped records without exposing database credentials.</p></div><button id="enable-product" class="primary" type="button">Enable product</button></div>
+      <div class="record-toolbar">
+        <label><span>Search records</span><input id="record-query" type="search" placeholder="Title, state, or data"></label>
+        <label><span>Record type</span><select id="record-type-filter"></select></label>
+        <strong id="record-count">0 records</strong>
+      </div>
+      <div id="record-grid" class="record-grid"></div>
+    </section>
+
+    <section id="view-workflows" class="view" hidden>
+      <div class="view-heading"><div><p class="eyebrow">TYPED OPERATIONS</p><h1>Workflows</h1><p>Every declared product action is available through a guided form, the CLI, and MCP with the same schema.</p></div></div>
+      <div id="workflow-groups" class="workflow-groups"></div>
+    </section>
+
+    <section id="view-ai" class="view" hidden>
+      <div class="view-heading"><div><p class="eyebrow">EVIDENCE-BOUND</p><h1>AI assistance</h1><p>AI creates reviewable proposals from typed evidence. It cannot bypass approvals or mutate consequential facts.</p></div></div>
+      <div id="ai-actions" class="ai-grid"></div>
+    </section>
+
+    <section id="view-settings" class="view" hidden>
+      <div class="view-heading"><div><p class="eyebrow">PRODUCT BOUNDARY</p><h1>Settings</h1><p id="settings-boundary"></p></div><button id="disconnect" class="secondary" type="button">Clear browser access</button></div>
+      <div class="settings-grid">
+        <article class="panel"><h2>Runtime</h2><dl class="detail-list"><div><dt>Module</dt><dd id="settings-module"></dd></div><div><dt>Minimum plan</dt><dd id="settings-plan"></dd></div><div><dt>Resource class</dt><dd id="settings-resource"></dd></div><div><dt>Product version</dt><dd id="settings-version"></dd></div></dl></article>
+        <article class="panel"><h2>AI capabilities</h2><ul id="capability-list" class="capability-list"></ul></article>
+        <article class="panel security-panel"><h2>Security model</h2><p>The browser key only unlocks this local product server. Your scoped bearer token remains server-side, and all durable tenant isolation stays in managed-oss-cloud.</p></article>
+      </div>
     </section>
   </main>
-  <script type="module" src="/app.js"></script>
+
+  <datalist id="record-identifiers"></datalist>
+
+  <dialog id="connect-dialog" class="modal connect-modal">
+    <div class="modal-heading"><div><p class="kicker">Private connection</p><h2>Connect this browser</h2><p>Enter the separate web access key configured for this product server. Never enter the backend bearer token here.</p></div><button id="connect-cancel" type="button" class="icon-button" aria-label="Close">×</button></div>
+    <label class="modal-field" for="web-key"><span>Web access key</span><input id="web-key" type="password" autocomplete="current-password" placeholder="At least 24 characters"></label>
+    <div class="modal-actions"><button id="connect" class="primary" type="button">Connect workspace</button></div>
+  </dialog>
+
+  <dialog id="action-dialog" class="modal action-modal">
+    <div class="modal-heading"><div><div class="action-meta"><span id="action-scope" class="scope"></span><span id="action-operation" class="scope"></span></div><h2 id="action-dialog-title">Run workflow</h2><p id="action-dialog-description"></p></div><button id="action-close" type="button" class="icon-button" aria-label="Close">×</button></div>
+    <form id="action-form" class="action-form"></form>
+    <details id="advanced-input" class="advanced-input"><summary>Advanced JSON input</summary><label for="action-json">Typed JSON</label><textarea id="action-json" spellcheck="false"></textarea></details>
+    <section id="action-result" class="action-result" hidden><h3>Workflow result</h3><pre id="action-result-json"></pre></section>
+    <div class="modal-actions"><button id="action-execute" class="primary" type="button">Run workflow</button></div>
+  </dialog>
+
+  <dialog id="record-dialog" class="modal record-modal">
+    <div class="modal-heading"><div><p class="kicker">Durable record</p><h2 id="record-detail-title">Record</h2><p id="record-detail-meta"></p></div><button id="record-close" type="button" class="icon-button" aria-label="Close">×</button></div>
+    <pre id="record-detail-json" class="record-json"></pre>
+  </dialog>
+
+  <script type="module" src="/app.js?v=0.2.0"></script>
 </body>
 </html>

@@ -4,6 +4,14 @@ Versioned jobs, structured applications, candidate rights, and review-only AI su
 
 TalentLedger is a focused, public MIT distribution for the `hire` module in [managed-oss-cloud](https://github.com/rohanarun/managed-oss-cloud). It includes a product web UI, a product-scoped HTTP client, the `talentledger` CLI, and a stdio MCP server exposing only this product's 17 typed actions.
 
+![TalentLedger sample workspace](./docs/product-workspace.png)
+
+## Product v1 boundary
+
+This release is declared-action complete: every typed action in this repository's product manifest is exposed through guided schema-driven browser forms with durable record browsing, workflow groups, AI proposal surfaces, connection settings, CLI parity, and MCP parity. The screenshot above is captured from the actual application in its visibly labeled local sample-workspace mode.
+
+That boundary does not claim feature parity with any unrelated mature third-party product. Provider adapters, external delivery, customer-selected storage, legal review, and other category-specific stop lines remain explicit in the [suite acceptance matrix](https://github.com/rohanarun/managed-oss-cloud/blob/main/docs/product-v1-acceptance.md).
+
 ## Current boundary
 
 This repository is runnable, but it is intentionally not a second database server. Authentication, workspace isolation, shared PostgreSQL storage, plan enforcement, AI execution, and audit records remain behind the managed-oss-cloud API. This product receives a scoped API token and cannot receive database credentials or run database migrations.
@@ -51,15 +59,23 @@ npm start
 
 Open `http://127.0.0.1:4173`. Put the service behind TLS and an authenticated reverse proxy before exposing it to a network.
 
+To explore the complete product UI without a backend account, start the clearly labeled local sample workspace:
+
+```bash
+npm run demo
+```
+
+Open `http://127.0.0.1:4173` and connect with `sample-workspace-key-2026`. Sample mode is only a UI fixture; backend and persistence acceptance is tested separately against managed-oss-cloud.
+
 Docker runs the same server:
 
 ```bash
-docker build -t talentledger:0.1.0 .
+docker build -t talentledger:0.2.0 .
 docker run --rm -p 4173:4173 \
   -e TALENTLEDGER_TOKEN \
   -e TALENTLEDGER_URL \
   -e TALENTLEDGER_WEB_KEY \
-  talentledger:0.1.0
+  talentledger:0.2.0
 ```
 
 ## Connect the MCP server
@@ -113,7 +129,7 @@ Then point `TALENTLEDGER_URL` at the self-hosted control-plane origin. All produ
 | `candidate-export` | Create candidate export | `write` | `command` |
 | `deletion-preview` | Preview candidate deletion | `write` | `command` |
 
-The complete machine-readable module definition, JSON input schemas, MCP tool names, risk metadata, examples, and release provenance are pinned in [product-manifest.json](./product-manifest.json).
+The complete machine-readable module definition, JSON input schemas, MCP tool names, examples, and release provenance are pinned in [product-manifest.json](./product-manifest.json).
 
 ## Clean-room statement
 
@@ -134,10 +150,11 @@ See [SECURITY.md](./SECURITY.md) for vulnerability reporting and the trust bound
 ```bash
 npm test
 npm run verify
+npm run verify:screenshot
 npm pack --dry-run
 ```
 
-The tests run against a fake API and prove bearer authentication, fixed module routing, input validation, CLI execution, stdio MCP discovery/calls, web-key protection, and server-side token handling.
+The repository tests prove bearer authentication, fixed module routing, input validation, every declared action's HTTP/CLI/MCP registration, sample-workspace behavior, web-key protection, server-side token handling, and the captured PNG's format and dimensions. Durable backend behavior and tenant isolation remain covered by managed-oss-cloud's PostgreSQL and application acceptance suites.
 
 ## License
 
