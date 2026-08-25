@@ -19,5 +19,6 @@ jobs:
       - run: npm test
       - run: npm run verify
       - run: npm run verify:screenshot
+      - run: npm run verify:tutorial
       - run: npm pack --dry-run
       - run: docker build --tag product-ci:test .

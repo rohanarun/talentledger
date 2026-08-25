@@ -1,0 +1,169 @@
+{
+  "schema": "managed-oss-functional-tutorial.v1",
+  "product": {
+    "slug": "talentledger",
+    "name": "TalentLedger",
+    "moduleId": "hire",
+    "version": "0.3.1",
+    "manifestSha256": "1d0b3f62a699f20c176cb924d6809d07bef97235dbde448da24223fa743e7c95"
+  },
+  "backend": {
+    "release": "v0.4.4",
+    "commit": "148abce99b91d8b9fdc8aa41c3f0eba283796db4"
+  },
+  "testedAt": "2026-08-25T22:04:46.290Z",
+  "browser": {
+    "engine": "Chromium",
+    "version": "151.0.7922.174",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "functionalProof": {
+    "action": {
+      "id": "job-draft",
+      "title": "Draft hiring job",
+      "httpStatus": 200
+    },
+    "record": {
+      "id": "2350f5ac-9145-481a-83a2-a86605c27336",
+      "recordType": "job",
+      "title": "TalentLedger functional tutorial",
+      "state": "draft"
+    },
+    "detail": {
+      "httpStatus": 200,
+      "matched": true
+    },
+    "assertions": [
+      "browser-authenticated-real-backend",
+      "guided-form-submitted",
+      "action-http-200",
+      "durable-record-returned",
+      "record-detail-http-200",
+      "exact-record-reopened-in-ui"
+    ]
+  },
+  "timeline": [
+    {
+      "stepId": "overview",
+      "observedLabel": "Meet TalentLedger",
+      "observedFact": "Open the real TalentLedger workspace and identify its core workflow.",
+      "startMs": 0,
+      "endMs": 2250
+    },
+    {
+      "stepId": "connect",
+      "observedLabel": "Connect the workspace",
+      "observedFact": "Authenticate this browser to the isolated shared backend and load durable records.",
+      "startMs": 2250,
+      "endMs": 5375
+    },
+    {
+      "stepId": "configure",
+      "observedLabel": "Draft hiring job",
+      "observedFact": "Complete the guided, contract-validated form for the product's primary workflow.",
+      "startMs": 5375,
+      "endMs": 8000
+    },
+    {
+      "stepId": "execute",
+      "observedLabel": "Run the real workflow",
+      "observedFact": "Submit the action to the shared backend and require a successful durable result.",
+      "startMs": 8000,
+      "endMs": 10375
+    },
+    {
+      "stepId": "inspect",
+      "observedLabel": "Inspect the saved record",
+      "observedFact": "Search the product record view and reopen the exact record returned by the workflow.",
+      "startMs": 10375,
+      "endMs": 17000
+    }
+  ],
+  "explanation": {
+    "title": "Drafting a Hiring Job in TalentLedger",
+    "summary": "Walk through connecting to TalentLedger, drafting a versioned hiring job with required stages, executing the workflow, and inspecting the generated durable record.",
+    "cues": [
+      {
+        "stepId": "overview",
+        "startMs": 0,
+        "endMs": 2250,
+        "label": "Meet TalentLedger",
+        "subtitle": "Access the TalentLedger workspace overview and review primary workflows."
+      },
+      {
+        "stepId": "connect",
+        "startMs": 2250,
+        "endMs": 5375,
+        "label": "Connect the workspace",
+        "subtitle": "Click Connect workspace to authenticate and connect to the shared backend."
+      },
+      {
+        "stepId": "configure",
+        "startMs": 5375,
+        "endMs": 8000,
+        "label": "Draft hiring job",
+        "subtitle": "Open the Draft hiring job dialog to configure the job title, description, and pipeline stages."
+      },
+      {
+        "stepId": "execute",
+        "startMs": 8000,
+        "endMs": 10375,
+        "label": "Run the real workflow",
+        "subtitle": "Submit the form to create a content-addressed job draft and verify completion."
+      },
+      {
+        "stepId": "inspect",
+        "startMs": 10375,
+        "endMs": 17000,
+        "label": "Inspect the saved record",
+        "subtitle": "Navigate to Records to view and inspect the newly created job draft record."
+      }
+    ],
+    "generation": {
+      "provider": "OpenRouter",
+      "model": "google/gemini-3.7-flash",
+      "requestedModel": "google/gemini-3.7-flash",
+      "responseModel": "google/gemini-3.7-flash",
+      "responseId": "gen-1787695482-9bkqTSlzluPp6dolR7Of",
+      "responseCreatedAt": "2026-08-25T22:04:42.000Z",
+      "input": {
+        "rawVideoSha256": "738c8ad71aa7136fb9d03ea6cb6b6d57230e2005f332269f30df63ef3ce43e37",
+        "workflowFactsSha256": "d344cd0c2ab5570580138b254df09ffbfef6703b5016be7ca5acbc39fb330811"
+      },
+      "usage": {
+        "promptTokens": 1566,
+        "completionTokens": 512,
+        "totalTokens": 2078
+      }
+    }
+  },
+  "video": {
+    "raw": {
+      "sha256": "738c8ad71aa7136fb9d03ea6cb6b6d57230e2005f332269f30df63ef3ce43e37",
+      "codec": "h264",
+      "width": 1280,
+      "height": 720,
+      "durationSeconds": 17,
+      "sizeBytes": 367262
+    },
+    "final": {
+      "file": "docs/tutorial.mp4",
+      "sha256": "9f91c1a3a5b5c9302ba89a094e79bfe909b91f4636a0d2dac50ce0be7c5b24ea",
+      "codec": "h264",
+      "width": 1280,
+      "height": 720,
+      "durationSeconds": 17,
+      "sizeBytes": 371640
+    },
+    "subtitles": {
+      "file": "docs/tutorial.srt",
+      "sha256": "623dee954e207f043d74c8c9d93481d471dd91dfe7c8f151ff4d9ad1d24828bb",
+      "format": "SubRip"
+    },
+    "overlaysBurnedIn": true,
+    "silent": true
+  }
+}

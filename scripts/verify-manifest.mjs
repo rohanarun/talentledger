@@ -3,8 +3,8 @@ import { manifest } from "../src/manifest.mjs";
 import { validateInput } from "../src/validation.mjs";
 
 assert.equal(manifest.schemaVersion, 1);
-assert.equal(manifest.release.backendRelease, "v0.4.3");
-assert.equal(manifest.release.backendCommit, "6947288c99d77f6391beb56211a6750c229a58d2");
+assert.equal(manifest.release.backendRelease, "v0.4.4");
+assert.equal(manifest.release.backendCommit, "148abce99b91d8b9fdc8aa41c3f0eba283796db4");
 assert.equal(manifest.release.backendSourceSnapshotSha256, "2a97e3dd83247132d34fd65b6a217e6eb151d9fb3ecff87bfb062e16aa2cff3f");
 assert.ok(manifest.actions.length > 0);
 assert.ok(manifest.actions.every((action) => action.moduleId === manifest.module.id));

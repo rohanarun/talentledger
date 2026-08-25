@@ -30,6 +30,12 @@ function shortDate(value) {
   return Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(date) : "Not dated";
 }
 
+function dateTimeLocalValue(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return new Date(date.getTime() - (date.getTimezoneOffset() * 60_000)).toISOString().slice(0, 16);
+}
+
 function make(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -265,6 +271,16 @@ function fieldDescription(schema) {
   return schema.description || (schema.format ? "Required format: " + schema.format + "." : "Typed input enforced by the product action contract.");
 }
 
+function runtimeExampleInput(action) {
+  const example = structuredClone(action.exampleInput ?? {});
+  const currentUserId = workspaceValue().userId;
+  if (!currentUserId) return example;
+  for (const name of ["employeeRef", "managerRef", "ownerRef"]) {
+    if (Object.hasOwn(action.inputSchema.properties ?? {}, name) && typeof example[name] === "string") example[name] = currentUserId;
+  }
+  return example;
+}
+
 function createField(name, schema, value, required) {
   const group = make("div", "field-group");
   const label = make("label", "field-label");
@@ -300,7 +316,7 @@ function createField(name, schema, value, required) {
     if (schema.minimum !== undefined) control.min = String(schema.minimum);
     if (schema.maximum !== undefined) control.max = String(schema.maximum);
     if (schema.maxLength !== undefined) control.maxLength = schema.maxLength;
-    if (value !== undefined && value !== null) control.value = schema.format === "date-time" ? String(value).replace(/Z$/, "").slice(0, 16) : String(value);
+    if (value !== undefined && value !== null) control.value = schema.format === "date-time" ? dateTimeLocalValue(value) : String(value);
     if (schema.format === "uuid" || /Id$/.test(name)) {
       control.setAttribute("list", "record-identifiers");
       control.placeholder = "Select or paste a record ID";
@@ -317,7 +333,7 @@ function createField(name, schema, value, required) {
 function buildActionForm(action) {
   const form = clear(byId("action-form"));
   const required = new Set(action.inputSchema.required ?? []);
-  const example = action.exampleInput ?? {};
+  const example = runtimeExampleInput(action);
   for (const [name, schema] of Object.entries(action.inputSchema.properties ?? {})) form.append(createField(name, schema, example[name], required.has(name)));
   byId("action-json").value = JSON.stringify(example, null, 2);
   form.addEventListener("input", () => {
@@ -354,6 +370,11 @@ function collectActionInput(action) {
 function openAction(actionId) {
   const action = state.manifest.actions.find((candidate) => candidate.id === actionId);
   if (!action) return;
+  if (!state.connected) {
+    byId("connect-dialog").showModal();
+    toast("Connect the product server before opening a workflow.", "error");
+    return;
+  }
   state.selectedAction = action;
   byId("action-dialog-title").textContent = action.title;
   byId("action-dialog-description").textContent = action.description;

@@ -1,0 +1,19 @@
+1
+00:00:00,000 --> 00:00:02,250
+Access the TalentLedger workspace overview and review primary workflows.
+
+2
+00:00:02,250 --> 00:00:05,375
+Click Connect workspace to authenticate and connect to the shared backend.
+
+3
+00:00:05,375 --> 00:00:08,000
+Open the Draft hiring job dialog to configure the job title, description, and pipeline stages.
+
+4
+00:00:08,000 --> 00:00:10,375
+Submit the form to create a content-addressed job draft and verify completion.
+
+5
+00:00:10,375 --> 00:00:17,000
+Navigate to Records to view and inspect the newly created job draft record.

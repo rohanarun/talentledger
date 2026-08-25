@@ -1,6 +1,6 @@
 {
   "name": "@managed-oss/talentledger",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.",
   "type": "module",
   "license": "MIT",
@@ -34,6 +34,7 @@
     "demo": "node src/demo-server.mjs",
     "test": "node --test --test-concurrency=1",
     "verify": "node scripts/verify-manifest.mjs && node --test --test-concurrency=1",
-    "verify:screenshot": "node scripts/verify-screenshot.mjs"
+    "verify:screenshot": "node scripts/verify-screenshot.mjs",
+    "verify:tutorial": "node scripts/verify-tutorial.mjs"
   }
 }

@@ -6,6 +6,12 @@ TalentLedger is a focused, public MIT distribution for the `hire` module in [man
 
 ![TalentLedger sample workspace](./docs/product-workspace.png)
 
+## Functional tutorial
+
+[Watch the real-backend product tutorial](./docs/tutorial.mp4) · [Download subtitles](./docs/tutorial.srt) · [Inspect functional proof](./docs/tutorial-proof.json)
+
+The tutorial is captured from this product's actual browser UI against an isolated shared backend. Publication requires a successful guided action, an HTTP 200 durable-record readback, the exact record reopened in the UI, Gemini-generated explanations through OpenRouter, burned-in step captions, and matching artifact hashes.
+
 ## Product v1 boundary
 
 This release is declared-action complete: every typed action in this repository's product manifest is exposed through guided schema-driven browser forms with paginated durable record summaries, detail-only payload reads, workflow groups, AI proposal surfaces, connection settings, CLI parity, and MCP parity. The screenshot above is captured from the actual application while it is connected to the shared authenticated backend and displaying records created through real product actions.
@@ -17,10 +23,10 @@ That boundary does not claim feature parity with any unrelated mature third-part
 This repository is runnable, but it is intentionally not a second database server. Authentication, workspace isolation, shared PostgreSQL storage, plan enforcement, AI execution, and audit records remain behind the managed-oss-cloud API. This product receives a scoped API token and cannot receive database credentials or run database migrations.
 
 - Hosted backend: `https://cloud.getsupers.com`
-- Self-hosted backend: any compatible managed-oss-cloud v0.4.3 deployment
+- Self-hosted backend: any compatible managed-oss-cloud v0.4.4 deployment
 - Hosted minimum plan: `starter`
 - Resource class: `shared`
-- Pinned backend source: [v0.4.3](https://github.com/rohanarun/managed-oss-cloud/tree/v0.4.3) at `6947288c99d77f6391beb56211a6750c229a58d2`
+- Pinned backend source: [v0.4.4](https://github.com/rohanarun/managed-oss-cloud/tree/v0.4.4) at `148abce99b91d8b9fdc8aa41c3f0eba283796db4`
 
 ## AI-native by construction
 
@@ -72,12 +78,12 @@ Open `http://127.0.0.1:4173` and connect with `sample-workspace-key-2026`. Sampl
 Docker runs the same server:
 
 ```bash
-docker build -t talentledger:0.3.0 .
+docker build -t talentledger:0.3.1 .
 docker run --rm -p 4173:4173 \
   -e TALENTLEDGER_TOKEN \
   -e TALENTLEDGER_URL \
   -e TALENTLEDGER_WEB_KEY \
-  talentledger:0.3.0
+  talentledger:0.3.1
 ```
 
 ## Connect the MCP server
@@ -103,7 +109,7 @@ The MCP server uses newline-delimited JSON-RPC over stdio and implements `initia
 ```bash
 git clone https://github.com/rohanarun/managed-oss-cloud.git
 cd managed-oss-cloud
-git checkout v0.4.3
+git checkout v0.4.4
 # Follow that repository's PostgreSQL, migration, TLS, and runtime instructions.
 ```
 
@@ -153,6 +159,7 @@ See [SECURITY.md](./SECURITY.md) for vulnerability reporting and the trust bound
 npm test
 npm run verify
 npm run verify:screenshot
+npm run verify:tutorial
 npm pack --dry-run
 ```
 
