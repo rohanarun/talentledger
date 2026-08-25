@@ -25,8 +25,19 @@ test("CLI invokes the fixed product endpoint", async (context) => {
     [manifest.product.environmentPrefix + "_TOKEN"]: "test-token",
     [manifest.product.environmentPrefix + "_URL"]: fake.url,
   };
+  const pageOptions = { recordType: manifest.module.recordTypes[0], state: "active", search: "Alpha", limit: 100, cursor: "opaque-page" };
+  const { stdout: pageOutput } = await execute(process.execPath, [cli, "page", JSON.stringify(pageOptions)], { env });
+  const page = JSON.parse(pageOutput);
+  assert.equal(page.records[0].moduleId, manifest.module.id);
+  assert.equal(page.records[0].data, undefined);
+  const { stdout: detailOutput } = await execute(process.execPath, [cli, "detail", page.records[0].id], { env });
+  assert.equal(JSON.parse(detailOutput).record.data.privatePayload, "detail-only");
   const { stdout } = await execute(process.execPath, [cli, "action", action.id, JSON.stringify(action.exampleInput)], { env });
   const result = JSON.parse(stdout);
   assert.equal(result.moduleId, manifest.module.id);
   assert.equal(result.actionId, action.id);
+  const pageRequest = fake.requests.find((request) => request.path === "/api/suite/modules/" + manifest.module.id + "/records");
+  assert.match(pageRequest.search, /state=active/);
+  assert.match(pageRequest.search, /search=Alpha/);
+  assert.match(pageRequest.search, /cursor=opaque-page/);
 });

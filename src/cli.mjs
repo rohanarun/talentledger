@@ -14,6 +14,8 @@ function usage() {
     "  " + command + " workspace\n" +
     "  " + command + " enable\n" +
     "  " + command + " list [record-type] [limit]\n" +
+    "  " + command + " page [json-options]\n" +
+    "  " + command + " detail <record-id>\n" +
     "  " + command + " ai-status <action-id>\n" +
     "  " + command + " action <action> <json-input>\n\n" +
     "Environment:\n" +
@@ -33,6 +35,10 @@ function parseObject(value) {
   return parsed;
 }
 
+function parsePageOptions(value) {
+  return value ? parseObject(value) : {};
+}
+
 async function run(argv = process.argv.slice(2)) {
   const [command, ...args] = argv;
   if (!command || command === "help" || command === "--help" || command === "-h") return process.stdout.write(usage() + "\n");
@@ -49,6 +55,8 @@ async function run(argv = process.argv.slice(2)) {
   if (command === "workspace") return output(await client.workspace());
   if (command === "enable") return output(await client.enable());
   if (command === "list") return output(await client.listRecords({ recordType: args[0], limit: args[1] ? Number(args[1]) : 50 }));
+  if (command === "page") return output(await client.listRecords(parsePageOptions(args[0])));
+  if (command === "detail") return output(await client.recordDetail(args[0]));
   if (command === "ai-status") return output(await client.aiStatus(args[0]));
   if (command === "action") {
     if (!args[0]) throw new Error("Choose an action: " + actions.map((item) => item.id).join(", ") + ".");

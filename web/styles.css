@@ -133,12 +133,14 @@ kbd { position: absolute; right: 0.65rem; border: 1px solid var(--line-strong); 
 .view-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; min-height: 18rem; padding: 4rem 0 3rem; }
 .view-heading h1 { margin-bottom: 0.7rem; }
 .view-heading p:not(.eyebrow) { max-width: 56rem; margin-bottom: 0; }
-.record-toolbar { display: grid; grid-template-columns: minmax(15rem, 1fr) minmax(12rem, 0.45fr) auto; gap: 0.8rem; align-items: end; border: 1px solid var(--line); border-radius: 1rem; padding: 1rem; background: var(--surface); }
+.record-toolbar { display: grid; grid-template-columns: minmax(15rem, 1fr) minmax(11rem, 0.42fr) minmax(10rem, 0.36fr) auto; gap: 0.8rem; align-items: end; border: 1px solid var(--line); border-radius: 1rem; padding: 1rem; background: var(--surface); }
 .record-toolbar label { display: grid; gap: 0.42rem; color: var(--muted); font-size: 0.7rem; }
 .record-toolbar strong { padding: 0.8rem 0; color: var(--muted-strong); font-size: 0.74rem; white-space: nowrap; }
 .record-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: dense; gap: 0.8rem; margin-top: 0.8rem; }
 .record-grid .record-card { min-height: 11rem; padding: 1rem; }
 .record-grid .record-title { align-self: end; font-size: 1.05rem; }
+.record-pagination { display: flex; justify-content: center; padding: 1.2rem 0 0; }
+.record-pagination button { min-width: 12rem; }
 .empty-state { display: grid; place-items: center; min-height: 9rem; margin: 0; border: 1px dashed var(--line-strong); border-radius: 0.72rem; padding: 1rem; text-align: center; }
 .empty-state.wide { grid-column: 1 / -1; }
 

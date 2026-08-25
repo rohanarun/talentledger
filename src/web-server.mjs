@@ -83,7 +83,14 @@ export function createProductWebServer({ client, webKey }) {
       let result;
       if (request.method === "GET" && url.pathname === "/product-api/workspace") result = await client.workspace();
       else if (request.method === "POST" && url.pathname === "/product-api/enable") result = await client.enable();
-      else if (request.method === "GET" && url.pathname === "/product-api/records") result = await client.listRecords({ recordType: url.searchParams.get("recordType") || undefined, limit: Number(url.searchParams.get("limit") ?? 50) });
+      else if (request.method === "GET" && url.pathname === "/product-api/records") result = await client.listRecords({
+        recordType: url.searchParams.get("recordType") || undefined,
+        state: url.searchParams.get("state") || undefined,
+        search: url.searchParams.get("search") || undefined,
+        limit: Number(url.searchParams.get("limit") ?? 50),
+        cursor: url.searchParams.get("cursor") || undefined,
+      });
+      else if (request.method === "GET" && url.pathname.startsWith("/product-api/records/")) result = await client.recordDetail(decodeURIComponent(url.pathname.slice("/product-api/records/".length)));
       else if (request.method === "GET" && url.pathname.startsWith("/product-api/ai-actions/")) result = await client.aiStatus(decodeURIComponent(url.pathname.slice("/product-api/ai-actions/".length)));
       else if (request.method === "POST" && url.pathname.startsWith("/product-api/actions/")) {
         const actionId = decodeURIComponent(url.pathname.slice("/product-api/actions/".length));

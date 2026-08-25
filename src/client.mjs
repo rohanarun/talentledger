@@ -12,6 +12,37 @@ function normalizeBaseUrl(value) {
   return url.href.endsWith("/") ? url.href : url.href + "/";
 }
 
+function clientInputError(message) {
+  const error = new Error(message);
+  error.status = 400;
+  return error;
+}
+
+function optionalQueryText(value, name, maximumLength = 200) {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string") throw clientInputError(name + " must be a string.");
+  const normalized = value.trim();
+  if (!normalized || normalized.length > maximumLength) throw clientInputError(name + " must contain from 1 to " + maximumLength + " characters.");
+  return normalized;
+}
+
+function recordId(value) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value ?? "")) throw clientInputError("Record ID must be a UUID.");
+  return value;
+}
+
+function listRecordSummary(record) {
+  return {
+    id: record.id,
+    moduleId: record.moduleId,
+    recordType: record.recordType,
+    title: record.title,
+    state: record.state,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+  };
+}
+
 export class ProductClient {
   constructor(options) {
     if (!options?.token || typeof options.token !== "string") throw new Error("A scoped workspace API token is required.");
@@ -50,11 +81,25 @@ export class ProductClient {
 
   listRecords(options = {}) {
     const limit = options.limit ?? 50;
-    if (!Number.isInteger(limit) || limit < 1 || limit > 200) throw new Error("Record limit must be an integer from 1 to 200.");
-    if (options.recordType && !manifest.module.recordTypes.includes(options.recordType)) throw new Error("Unknown record type for " + manifest.product.name + ".");
-    const query = new URLSearchParams({ moduleId: manifest.module.id, limit: String(limit) });
-    if (options.recordType) query.set("recordType", options.recordType);
-    return this.request("/api/suite/records?" + query.toString());
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw clientInputError("Record limit must be an integer from 1 to 100.");
+    const recordType = optionalQueryText(options.recordType, "Record type");
+    if (recordType && !manifest.module.recordTypes.includes(recordType)) throw clientInputError("Unknown record type for " + manifest.product.name + ".");
+    const state = optionalQueryText(options.state, "Record state");
+    const search = optionalQueryText(options.search, "Record search");
+    const cursor = optionalQueryText(options.cursor, "Record cursor", 2_048);
+    const query = new URLSearchParams({ limit: String(limit) });
+    if (recordType) query.set("recordType", recordType);
+    if (state) query.set("state", state);
+    if (search) query.set("search", search);
+    if (cursor) query.set("cursor", cursor);
+    return this.request("/api/suite/modules/" + manifest.module.id + "/records?" + query.toString()).then((page) => ({
+      ...page,
+      records: Array.isArray(page.records) ? page.records.map(listRecordSummary) : [],
+    }));
+  }
+
+  recordDetail(value) {
+    return this.request("/api/suite/modules/" + manifest.module.id + "/records/" + encodeURIComponent(recordId(value)));
   }
 
   aiStatus(actionId) {

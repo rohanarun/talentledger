@@ -10,6 +10,7 @@ const builtInNames = {
   workspace: prefix + "_workspace",
   enable: prefix + "_enable",
   list: prefix + "_list_records",
+  detail: prefix + "_record_detail",
   aiStatus: prefix + "_ai_status",
 };
 
@@ -46,8 +47,23 @@ export function productTools() {
         type: "object",
         properties: {
           recordType: { type: "string", enum: manifest.module.recordTypes },
-          limit: { type: "integer", minimum: 1, maximum: 200, default: 50 },
+          state: { type: "string", minLength: 1, maxLength: 200 },
+          search: { type: "string", minLength: 1, maxLength: 200, description: "Case-insensitive title prefix or exact record ID." },
+          limit: { type: "integer", minimum: 1, maximum: 100, default: 50 },
+          cursor: { type: "string", minLength: 1, maxLength: 2048, description: "Opaque continuation cursor returned by the previous page." },
         },
+        additionalProperties: false,
+      },
+      annotations: { readOnlyHint: true, openWorldHint: false },
+    },
+    {
+      name: builtInNames.detail,
+      title: "Read " + manifest.product.name + " record detail",
+      description: "Read one visible product record including its payload. Requires read scope.",
+      inputSchema: {
+        type: "object",
+        required: ["recordId"],
+        properties: { recordId: { type: "string", format: "uuid" } },
         additionalProperties: false,
       },
       annotations: { readOnlyHint: true, openWorldHint: false },
@@ -91,7 +107,14 @@ function errorResult(error) {
 export async function callProductTool(name, args, client) {
   if (name === builtInNames.workspace) return result(await client.workspace());
   if (name === builtInNames.enable) return result(await client.enable());
-  if (name === builtInNames.list) return result(await client.listRecords(args ?? {}));
+  if (name === builtInNames.list) {
+    validateInput(productTools().find((tool) => tool.name === builtInNames.list).inputSchema, args ?? {});
+    return result(await client.listRecords(args ?? {}));
+  }
+  if (name === builtInNames.detail) {
+    validateInput(productTools().find((tool) => tool.name === builtInNames.detail).inputSchema, args ?? {});
+    return result(await client.recordDetail(args.recordId));
+  }
   if (name === builtInNames.aiStatus) {
     validateInput(productTools().find((tool) => tool.name === builtInNames.aiStatus).inputSchema, args ?? {});
     return result(await client.aiStatus(args.actionId));

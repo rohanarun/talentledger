@@ -10,7 +10,13 @@ const state = {
   selectedAction: null,
   recordQuery: "",
   recordType: "all",
+  recordState: "",
+  nextCursor: null,
+  recordLoading: false,
+  recordRequestId: 0,
 };
+
+let recordRefreshTimer;
 
 const byId = (id) => document.getElementById(id);
 const queryAll = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -164,7 +170,7 @@ function recordCard(record, compact = false) {
   const top = make("span", "record-card-top");
   top.append(make("span", "record-type", humanize(record.recordType)), make("span", "record-state", humanize(record.state || "current")));
   card.append(top, make("strong", "record-title", record.title || humanize(record.recordType)), make("span", "record-date", "Updated " + shortDate(record.updatedAt)));
-  card.addEventListener("click", () => openRecord(record));
+  card.addEventListener("click", () => invoke(() => openRecord(record.id)));
   return card;
 }
 
@@ -178,21 +184,16 @@ function renderRecentRecords() {
   records.forEach((record) => target.append(recordCard(record, true)));
 }
 
-function filteredRecords() {
-  const query = state.recordQuery.trim().toLowerCase();
-  return state.records.filter((record) => {
-    if (state.recordType !== "all" && record.recordType !== state.recordType) return false;
-    if (!query) return true;
-    return [record.title, record.recordType, record.state, JSON.stringify(record.data)].some((value) => String(value ?? "").toLowerCase().includes(query));
-  });
-}
-
 function renderRecords() {
-  const records = filteredRecords();
-  byId("record-count").textContent = records.length + (records.length === 1 ? " record" : " records");
+  const records = state.records;
+  byId("record-count").textContent = records.length + (records.length === 1 ? " record loaded" : " records loaded");
+  const loadMore = byId("load-more-records");
+  loadMore.hidden = !state.connected || !state.nextCursor;
+  loadMore.disabled = state.recordLoading;
+  loadMore.textContent = state.recordLoading ? "Loading records" : "Load more records";
   const grid = clear(byId("record-grid"));
   if (!records.length) {
-    grid.append(make("p", "empty-state wide", state.connected ? "No records match this view." : "Connect a workspace to inspect records."));
+    grid.append(make("p", "empty-state wide", state.connected ? state.recordLoading ? "Loading records." : "No records match this view." : "Connect a workspace to inspect records."));
     return;
   }
   records.forEach((record) => grid.append(recordCard(record)));
@@ -245,7 +246,15 @@ function renderSettings() {
   state.manifest.module.aiCapabilities.forEach((capability) => capabilities.append(make("li", "", capability)));
 }
 
-function openRecord(record) {
+async function openRecord(recordId) {
+  setBusy(true, "Loading record detail");
+  let response;
+  try {
+    response = await api("/product-api/records/" + encodeURIComponent(recordId));
+  } finally {
+    setBusy(false);
+  }
+  const record = response.record ?? response;
   byId("record-detail-title").textContent = record.title || humanize(record.recordType);
   byId("record-detail-meta").textContent = humanize(record.recordType) + " · " + humanize(record.state || "current") + " · Updated " + shortDate(record.updatedAt);
   byId("record-detail-json").textContent = JSON.stringify(record, null, 2);
@@ -373,10 +382,16 @@ function renderActivity() {
   }
 }
 
-async function refreshRecords() {
-  if (!state.connected) return;
-  const response = await api("/product-api/records?limit=200");
-  state.records = Array.isArray(response.records) ? response.records : [];
+function recordPagePath(cursor) {
+  const query = new URLSearchParams({ limit: "50" });
+  if (state.recordType !== "all") query.set("recordType", state.recordType);
+  if (state.recordState.trim()) query.set("state", state.recordState.trim());
+  if (state.recordQuery.trim()) query.set("search", state.recordQuery.trim());
+  if (cursor) query.set("cursor", cursor);
+  return "/product-api/records?" + query.toString();
+}
+
+function renderRecordCollections() {
   renderMetrics();
   renderRecentRecords();
   renderRecords();
@@ -388,6 +403,37 @@ async function refreshRecords() {
     option.label = (record.title || humanize(record.recordType)) + " — " + humanize(record.recordType);
     identifiers.append(option);
   });
+}
+
+async function refreshRecords({ append = false } = {}) {
+  if (!state.connected) return;
+  const cursor = append ? state.nextCursor : undefined;
+  if (append && !cursor) return;
+  const requestId = ++state.recordRequestId;
+  state.recordLoading = true;
+  if (!append) state.nextCursor = null;
+  renderRecords();
+  try {
+    const response = await api(recordPagePath(cursor));
+    if (requestId !== state.recordRequestId) return;
+    const page = Array.isArray(response.records) ? response.records : [];
+    if (append) {
+      const existingIds = new Set(state.records.map((record) => record.id));
+      state.records = [...state.records, ...page.filter((record) => !existingIds.has(record.id))];
+    } else state.records = page;
+    state.nextCursor = typeof response.nextCursor === "string" && response.nextCursor ? response.nextCursor : null;
+    renderRecordCollections();
+  } finally {
+    if (requestId === state.recordRequestId) {
+      state.recordLoading = false;
+      renderRecords();
+    }
+  }
+}
+
+function scheduleRecordRefresh() {
+  clearTimeout(recordRefreshTimer);
+  recordRefreshTimer = setTimeout(() => invoke(() => refreshRecords()), 260);
 }
 
 async function connect() {
@@ -444,6 +490,9 @@ byId("disconnect").addEventListener("click", () => {
   state.workspace = null;
   state.records = [];
   state.demo = false;
+  state.nextCursor = null;
+  state.recordLoading = false;
+  state.recordRequestId += 1;
   sessionStorage.removeItem("product-web-key");
   byId("web-key").value = "";
   setConnection(false);
@@ -459,10 +508,12 @@ byId("enable-product").addEventListener("click", () => invoke(async () => {
   state.workspace = await api("/product-api/workspace");
   toast("Product enabled for this workspace.", "success");
 }));
-byId("refresh-records").addEventListener("click", () => invoke(refreshRecords));
+byId("refresh-records").addEventListener("click", () => invoke(() => refreshRecords()));
 byId("view-all-records").addEventListener("click", () => activateView("records"));
-byId("record-query").addEventListener("input", (event) => { state.recordQuery = event.target.value; renderRecords(); });
-byId("record-type-filter").addEventListener("change", (event) => { state.recordType = event.target.value; renderRecords(); });
+byId("record-query").addEventListener("input", (event) => { state.recordQuery = event.target.value; scheduleRecordRefresh(); });
+byId("record-type-filter").addEventListener("change", (event) => { state.recordType = event.target.value; invoke(() => refreshRecords()); });
+byId("record-state-filter").addEventListener("input", (event) => { state.recordState = event.target.value; scheduleRecordRefresh(); });
+byId("load-more-records").addEventListener("click", () => invoke(() => refreshRecords({ append: true })));
 byId("action-execute").addEventListener("click", executeSelectedAction);
 byId("action-close").addEventListener("click", () => byId("action-dialog").close());
 byId("record-close").addEventListener("click", () => byId("record-dialog").close());
@@ -471,6 +522,7 @@ byId("global-search").addEventListener("keydown", (event) => {
   state.recordQuery = event.currentTarget.value;
   byId("record-query").value = state.recordQuery;
   activateView("records");
+  invoke(() => refreshRecords());
 });
 document.addEventListener("keydown", (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {

@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="description" content="Versioned jobs, structured applications, candidate rights, and review-only AI summaries without automated hiring decisions.">
   <title>TalentLedger — Workspace</title>
-  <link rel="stylesheet" href="/styles.css?v=0.2.0">
+  <link rel="stylesheet" href="/styles.css?v=0.3.0">
 </head>
 <body>
   <div class="busy-overlay" aria-live="polite"><span class="busy-spinner"></span><span id="busy-label">Working</span></div>
@@ -82,11 +82,13 @@
     <section id="view-records" class="view" hidden>
       <div class="view-heading"><div><p class="eyebrow">DURABLE WORK</p><h1>Records</h1><p>Search, filter, and inspect product-scoped records without exposing database credentials.</p></div><button id="enable-product" class="primary" type="button">Enable product</button></div>
       <div class="record-toolbar">
-        <label><span>Search records</span><input id="record-query" type="search" placeholder="Title, state, or data"></label>
+        <label><span>Search records</span><input id="record-query" type="search" placeholder="Title prefix or exact record ID"></label>
         <label><span>Record type</span><select id="record-type-filter"></select></label>
+        <label><span>State</span><input id="record-state-filter" type="search" placeholder="Exact state"></label>
         <strong id="record-count">0 records</strong>
       </div>
       <div id="record-grid" class="record-grid"></div>
+      <div class="record-pagination"><button id="load-more-records" class="secondary" type="button" hidden>Load more records</button></div>
     </section>
 
     <section id="view-workflows" class="view" hidden>
@@ -130,6 +132,6 @@
     <pre id="record-detail-json" class="record-json"></pre>
   </dialog>
 
-  <script type="module" src="/app.js?v=0.2.0"></script>
+  <script type="module" src="/app.js?v=0.3.0"></script>
 </body>
 </html>
